@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]];
         file_put_contents($filename, json_encode($todos));
         $todo = '';
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        header('Location: /');
     }
 }
 
