@@ -1,7 +1,5 @@
 <?php
-const ERROR_REQUIRED = 'Veuillez renseigner une todo';
-const ERROR_TOO_SHORT = 'Veuillez entrer au moins 5 caractères';
-
+require_once 'errors.php';
 $filename = __DIR__ . "/data/todos.json";
 $error = '';
 $todo = '';
@@ -13,25 +11,7 @@ if (file_exists($filename)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $todo = $_POST['todo'] ?? '';
-
-    if (!$todo) {
-        $error = ERROR_REQUIRED;
-    } else if (mb_strlen($todo) < 5) {
-        $error = ERROR_TOO_SHORT;
-    }
-
-    if (!$error) {
-        $todos = [...$todos, [
-            'name' => $todo,
-            'done' => false,
-            'id' => time()
-        ]];
-        file_put_contents($filename, json_encode($todos));
-        $todo = '';
-        header('Location: /');
-    }
+    require_once 'add-todo.php';
 }
 
 ?>
@@ -61,12 +41,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php foreach ($todos as $t) : ?>
                         <li class="todo-item <?= $t['done'] ? 'low-opacity' : '' ?>">
                             <span class="todo-name"><?= $t['name'] ?></span>
-                            <a href="/edit-todo.php?id=<?= $t['id'] ?>">
-                                <button class="btn btn-primary btn-small"><?= $t['done'] ? 'Annuler' : 'Valider' ?></button>
-                            </a>
-                            <a href="/remove-todo.php?id=<?= $t['id'] ?>">
-                                <button class="btn btn-danger btn-small">Supprimer</button>
-                            </a>
+                            <form action="/modify-todo.php" method="post">
+                                <input type="hidden" value="edit" name="action">
+                                <input type="hidden" value="<?= $t['id'] ?>" name="id">
+                                <button type="submit" class="btn btn-primary btn-small"><?= $t['done'] ? 'Annuler' : 'Valider' ?></button>
+                            </form>
+                            <form action="/modify-todo.php" method="post">
+                                <input type="hidden" value="delete" name="action">
+                                <input type="hidden" value="<?= $t['id'] ?>" name="id">
+                                <button type="submit" class="btn btn-danger btn-small">Supprimer</button>
+                            </form>
                         </li>
                     <?php endforeach; ?>
                 </ul>
